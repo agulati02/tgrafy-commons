@@ -1,0 +1,9 @@
+httpx
+PyJWT
+requests
+cryptography
+pytest
+boto3
+boto3-stubs
+mypy-boto3-ssm
+pymongo
