@@ -13,3 +13,11 @@ class SSMSecretsManager(SecretsManagerInterface):
     def get_secret(self, secret_name: str) -> Union[str, None]:
         response = self.ssm_client.get_parameter(Name=secret_name, WithDecryption=True)
         return response.get("Parameter", {}).get("Value", None)
+
+    def get_secrets(self, secrets: list[str]) -> list[str | None] | None:
+        response = self.ssm_client.get_parameters(Names=secrets, WithDecryption=True)
+        secret_dict = {
+            secret.get("Name"): secret.get("Value", None)
+            for secret in response["Parameters"]
+        }
+        return [secret_dict[secret_name] for secret_name in secrets]
