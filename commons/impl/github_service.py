@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Any
 
 from httpx import Client
 
@@ -79,3 +79,33 @@ class GithubService(RepositoryServiceInterface):
         payload = {"body": content, "event": "COMMENT"}
         response = self.client.post(comments_url, headers=headers, json=payload)
         response.raise_for_status()
+    
+    def get_issue_comments(
+        self,
+        comments_url: str,
+        installation_id: int,
+        app_client_id: str,
+    ) -> list[dict[str, Any]]:
+        if not self.private_key:
+            raise ValueError("Private key could not be retrieved from secrets manager.")
+
+        jwt_token = self.token_manager.get_jwt_token(
+            private_key=self.private_key,
+            iss=app_client_id,
+        )
+        access_token = self.token_manager.get_installation_access_token(
+            jwt_token, installation_id
+        )
+
+        headers = {
+            "Authorization": f"token {access_token}",
+            "Accept": "application/vnd.github+json"
+        }
+
+        response = self.client.get(comments_url, headers=headers)
+        response.raise_for_status()
+
+        return [
+            {"user": comment["user"]["login"], "comment": comment["body"]} 
+            for comment in response.json()
+        ]
