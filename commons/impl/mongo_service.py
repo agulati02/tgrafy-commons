@@ -93,15 +93,16 @@ class MongoDBService(DatabaseServiceInterface):
         
         self._db.get_collection(collection).insert_one(data)
     
-    def update(self, collection: str, filter: dict[str, Any], diff: dict[str, Any]) -> None:
+    def update(self, collection: str, filter: dict[str, Any], diff: dict[str, Any], upsert: bool = False) -> None:
         """Updates a document"""
         if not isinstance(self._db, Database):
             raise ValueError("Database is not initialized")
         
         update_result: UpdateResult = self._db.get_collection(collection).update_one(
             filter=filter,
-            update={"$set": diff}
+            update={"$set": diff},
+            upsert=upsert
         )
 
-        if update_result.modified_count == 0:
+        if update_result.modified_count == 0 and not update_result.did_upsert:
             raise Exception(f"Document update failed for filter: {filter} and diff: {diff}")

@@ -23,6 +23,6 @@ class DatabaseServiceInterface(ABC):
         pass
 
     @abstractmethod
-    def update(self, collection: str, filter: dict[str, Any], diff: dict[str, Any]) -> None:
+    def update(self, collection: str, filter: dict[str, Any], diff: dict[str, Any], upsert: bool = True) -> None:
         """Update existing data in the database."""
         pass
